@@ -1,0 +1,176 @@
+<template>
+  <div class="home">
+    <h1 style="font-size:2em">介绍</h1>
+    <p>
+      这是一个干净的，简单的后台管理系统的前端模板，参考了
+      <el-link
+        type="primary"
+        href="https://panjiachen.gitee.io/vue-element-admin-site/zh/"
+        target="_blank"
+      >
+        vue-clean-admin
+      </el-link>
+      的部分代码，特别是权限路由做了很大的改动。
+    </p>
+    <p>
+      它也是基于
+      <el-link type="primary" href="https://cn.vuejs.org/" target="_blank">
+        vue
+      </el-link>
+      +
+      <el-link
+        type="primary"
+        href="https://element.eleme.cn/#/zh-CN/"
+        target="_blank"
+      >
+        element-ui
+      </el-link>
+      实现。目前没有集成太多功能，所以也没什么好配置的，简单来说就是拿来即用。
+    </p>
+
+    <h2>功能</h2>
+    <ul style="padding-left:20px">
+      <li>
+        <h4>权限路由</h4>
+        <p>
+          路由权限应该是任何一个后台管理系统都逃不掉的功能了，虽然实现方式总共就那几个技术点，但是每个人真正做起来却也是各种各样。
+        </p>
+        <p>
+          此系统中使用逻辑是：前端会先挂载所有的路由，在需要权限的路由的 meta
+          属性中会标记 permission 为 false，表示进入此页面需要权限且目前的权限为
+          false，然后在全局路由守卫中添加拦截，拦截逻辑为：
+          如果侧边栏菜单列表为空则请求并等待列表返回，返回之后侧边栏菜单列表会以路径匹配和系统路由表做个映射，将路由中有权限的路由的permission改为true，然后再进入，
+          如果侧边栏菜单不为空，则表示已经映射过路由，permission为false时直接重定向到401。
+        </p>
+        <p>
+          这样做的目的是我想将侧边栏菜单完全交给后端控制，包括菜单的嵌套关系，菜单名称，icon。还有就是角色数量不受限制。
+        </p>
+      </li>
+      <li>
+        <h4>路由缓存</h4>
+        <p>
+          路由缓存也是使用的
+          keep-alive，和tabs导航相对应，这部分代码基本上都是借鉴
+          <el-link
+            type="primary"
+            href="https://panjiachen.gitee.io/vue-element-admin-site/zh/"
+            target="_blank"
+          >
+            vue-element-admin
+          </el-link>
+          ，简单说一下思路：每次路由跳转时，判断当前路由的meta里是否存在title和name，如果有则添加到store里。刷新的时候先跳转到
+          redirect 页面，在这里先删除缓存再重新进入。
+        </p>
+      </li>
+      <li>
+        <h4>换肤</h4>
+        <p>
+          换肤原理很简单，就是两套element主题，一套有命名空间，一套没有，切换的时候动态在body上修改就行了，具体实现可以参考：<el-link
+            type="primary"
+            href="https://panjiachen.gitee.io/vue-element-admin-site/zh/guide/advanced/theme.html"
+            target="_blank"
+          >
+            https://panjiachen.gitee.io/vue-element-admin-site/zh/guide/advanced/theme.html
+          </el-link>
+        </p>
+        <p>还有一种只能切换主题色：我觉得没有意义，就没做。</p>
+      </li>
+      <li>
+        <h4>错误页面</h4>
+        <p>
+          404和401，如果你看了代码，你会发现我将这两个页面的permission设为true，原因是这两个页面是在layout里打开的，如果不设置此属性，用户就有可能在未登录的情况下直接进入layout，感觉不太合理。
+        </p>
+      </li>
+    </ul>
+    <h2>布局</h2>
+    <ul style="padding-left:20px">
+      <li>
+        <h4>自适应侧边栏</h4>
+        <p>
+          在屏幕宽度小于1200时，侧边栏会以另外一个方式收起。
+        </p>
+        <p>
+          侧边栏里的菜单完全是后端返回的，原因上面也说了，数据结构为一个数组开始的树。
+        </p>
+        <div>
+          <div>配置参数：</div>
+          <ul>
+            <li>path：页面路径</li>
+            <li>hidden：为true时不显示为菜单。</li>
+            <li>affix：tabs导航不能被删除</li>
+            <li>title：标题</li>
+            <li>icon：图标</li>
+            <li>
+              permission：如果没有此属性，前端会默认为true，所以它只有在等于布尔false时才有意义，此字段存在的意义在于某些系统可能需要向用户展示无权限页面的入口，以引导用户升级
+            </li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <h4>tabs导航</h4>
+        <ul>
+          <li>
+            这应该算是此模板中比较复杂的一个板块了，和路由缓存关联，支持鼠标滚轮滚动，右键菜单（刷新，关闭，关闭其他，关闭所有），拖动排序，当前tab自动靠中。
+          </li>
+          <li>
+            因为所以tab页面都会有缓存，所以如果你通过name传参的话是可能会失效的，因为就算你传过去了，它也不能触发任何操作，除非你在activated钩子中做处理。
+          </li>
+          <li>
+            我对?分割的传参做了一些处理，如果当前页面已经在tabs中，后面再携带不同参数的进入时，会先删除缓存再进入，并且替换掉之前的tab(因为页面路径已经改变)。
+          </li>
+          <li>
+            依然有bug，当假如从/about进入/about?id=555时，不会触发刷新，因为路由压根就没改变，我觉得这不是一个大问题，后期再决定要不要优化。
+          </li>
+        </ul>
+      </li>
+      <li>
+        <h4>面包屑</h4>
+        <p>一个简单的element组件，会优先使用后端返回的路由表的嵌套规则</p>
+      </li>
+      <li>锁屏</li>
+      <li>
+        <h4>全屏</h4>
+        <p>
+          <el-link
+            type="primary"
+            href="https://github.com/sindresorhus/screenfull.js"
+            target="_blank"
+          >
+            screenfull.js
+          </el-link>
+        </p>
+      </li>
+      <li>
+        <h4>回到顶部</h4>
+        <p>一个element组件</p>
+      </li>
+      <li>
+        <h4>进度条</h4>
+        <p>
+          <el-link
+            type="primary"
+            href="https://github.com/rstacruz/nprogress"
+            target="_blank"
+          >
+            nprogress
+          </el-link>
+        </p>
+        <p>
+          这是一个虚假的进度条，大部分网站用的都是这个，前端是不可能知道真正的进度的，使用它的目的仅仅是提升用户体验。目前只用在了页面跳转中，如果你愿意，还可以使用在请求中。
+        </p>
+      </li>
+    </ul>
+    <h2>模拟登录</h2>
+    <p>
+      已清除。。。
+    </p>
+  </div>
+</template>
+
+<script>
+// @ is an alias to /src
+
+export default {
+  name: "Home",
+};
+</script>

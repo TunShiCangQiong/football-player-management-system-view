@@ -1,102 +1,101 @@
 <template>
-  <div :class="classObj" class="app-wrapper">
-    <div v-if="device==='mobile'&&sidebar.opened" class="drawer-bg" @click="handleClickOutside" />
-    <sidebar class="sidebar-container" />
-    <div :class="{hasTagsView:needTagsView}" class="main-container">
-      <div :class="{'fixed-header':fixedHeader}">
-        <navbar />
-        <tags-view v-if="needTagsView" />
-      </div>
-      <app-main />
-      <right-panel v-if="showSettings">
-        <settings />
-      </right-panel>
-    </div>
-  </div>
+  <keep-alive>
+    <Lock v-if="isLock" />
+
+    <el-container v-else class="container">
+      <Aside />
+      <div
+        v-show="!isCollapse"
+        class="drawer-bg"
+        @click="setCollapse(!isCollapse)"
+      ></div>
+      <el-container>
+        <el-header class="el-header" height="auto">
+          <Header />
+          <Tabs />
+        </el-header>
+
+        <el-main class="main">
+          <WaterMark
+            :height="36"
+            :width="115"
+            image="https://gw.alipayobjects.com/zos/bmw-prod/59a18171-ae17-4fc5-93a0-2645f64a3aca.svg"
+          >
+            <keep-alive :include="include">
+              <router-view />
+            </keep-alive>
+          </WaterMark>
+        </el-main>
+
+        <el-backtop target=".main"></el-backtop>
+      </el-container>
+    </el-container>
+  </keep-alive>
 </template>
 
 <script>
-import RightPanel from '@/components/RightPanel'
-import { AppMain, Navbar, Settings, Sidebar, TagsView } from './components'
-import ResizeMixin from './mixin/ResizeHandler'
-import { mapState } from 'vuex'
+import Aside from "./Aside";
+import Header from "./Header";
+import Tabs from "./Tabs";
+import Lock from "./Lock";
+import WaterMark from "@/components/WaterMark";
 
 export default {
-  name: 'Layout',
-  components: {
-    AppMain,
-    Navbar,
-    RightPanel,
-    Settings,
-    Sidebar,
-    TagsView
-  },
-  mixins: [ResizeMixin],
+  components: { Aside, Header, Tabs, Lock, WaterMark },
   computed: {
-    ...mapState({
-      sidebar: state => state.app.sidebar,
-      device: state => state.app.device,
-      showSettings: state => state.settings.showSettings,
-      needTagsView: state => state.settings.tagsView,
-      fixedHeader: state => state.settings.fixedHeader
-    }),
-    classObj() {
-      return {
-        hideSidebar: !this.sidebar.opened,
-        openSidebar: this.sidebar.opened,
-        withoutAnimation: this.sidebar.withoutAnimation,
-        mobile: this.device === 'mobile'
-      }
-    }
+    //控制侧边栏展开收起状态
+    isCollapse() {
+      return this.$store.state.layout.isCollapse;
+    },
+    include() {
+      return this.$store.getters.include;
+    },
+    isLock() {
+      return this.$store.state.lock.isLock;
+    },
   },
   methods: {
-    handleClickOutside() {
-      this.$store.dispatch('app/closeSideBar', { withoutAnimation: false })
-    }
-  }
-}
+    // 控制侧边栏导航
+    setCollapse(collapse) {
+      this.$store.commit("setCollapse", collapse);
+    },
+  },
+};
 </script>
 
-<style lang="scss" scoped>
-  @import "~@/styles/mixin.scss";
-  @import "~@/styles/variables.scss";
+<style scoped lang="scss">
+.container {
+  position: relative;
 
-  .app-wrapper {
-    @include clearfix;
-    position: relative;
-    height: 100%;
-    width: 100%;
+  .el-header {
+    padding: 0 !important;
+  }
 
-    &.mobile.openSidebar {
-      position: fixed;
-      top: 0;
-    }
+  .main {
+    height: calc(100vh - 100px);
+    text-align: left;
+    background-color: $layout-main;
   }
 
   .drawer-bg {
-    background: #000;
-    opacity: 0.3;
-    width: 100%;
-    top: 0;
-    height: 100%;
-    position: absolute;
-    z-index: 999;
+    display: none;
   }
 
-  .fixed-header {
-    position: fixed;
-    top: 0;
-    right: 0;
-    z-index: 9;
-    width: calc(100% - #{$sideBarWidth});
-    transition: width 0.28s;
+  @media screen and (max-width: 1200px) {
+    .drawer-bg {
+      display: block;
+      width: 100%;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      background: #000;
+      opacity: 0.3;
+      z-index: 1999;
+    }
   }
+}
 
-  .hideSidebar .fixed-header {
-    width: calc(100% - 54px)
-  }
-
-  .mobile .fixed-header {
-    width: 100%;
-  }
+.dark-theme .container .main {
+  background-color: $dark-layout-main;
+}
 </style>

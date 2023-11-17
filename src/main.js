@@ -1,53 +1,43 @@
-import Vue from 'vue'
+import Vue from "vue";
+import App from "./App.vue";
+import router from "./router";
+import store from "./store";
+import ElementUI from "element-ui";
+import "@/permissions.js"; // 路由权限
+import "element-ui/lib/theme-chalk/index.css";
+import "element-ui/lib/theme-chalk/display.css";
+import "@/styles/theme/index.css"; //换肤样式
+import "@/styles/index.scss"; //全局公共样式
+import Fragment from "vue-fragment"; // 可产生虚拟根节点
+import ElTableEdit from "el-table-edit";
+import "@/filters/index"; // 全局过滤器
+import "@/directive/index"; // 注册全局指令
+import MyElement from "@/components/my-element"; // ElementUI 组件覆盖
+import ImageViewer from "@/components/ImageViewer/index"; // 图片预览组件
 
-import Cookies from 'js-cookie'
+Vue.config.productionTip = false;
 
-import 'normalize.css/normalize.css' // a modern alternative to CSS resets
+Vue.use(ElementUI);
+Vue.use(Fragment.Plugin);
+Vue.use(ElTableEdit);
+Vue.use(MyElement);
 
-import Element from 'element-ui'
-import './styles/element-variables.scss'
-import enLang from 'element-ui/lib/locale/lang/en'// 如果使用中文语言包请默认支持，无需额外引入，请删除该依赖
+// 设置element组件默认值
+Vue.prototype.$ELEMENT = { size: "medium", zIndex: 3000 };
+Vue.prototype.$imageViewer = ImageViewer;
 
-import '@/styles/index.scss' // global css
-
-import App from './App'
-import store from './store'
-import router from './router'
-
-import './icons' // icon
-import './permission' // permission control
-import './utils/error-log' // error log
-
-import * as filters from './filters' // global filters
-
-/**
- * If you don't want to use mock-server
- * you want to use MockJs for mock api
- * you can execute: mockXHR()
- *
- * Currently MockJs will be used in the production environment,
- * please remove it before going online ! ! !
- */
-if (process.env.NODE_ENV === 'production') {
-  const { mockXHR } = require('../mock')
-  mockXHR()
-}
-
-Vue.use(Element, {
-  size: Cookies.get('size') || 'medium', // set element-ui default size
-  locale: enLang // 如果使用中文，无需设置，请删除
-})
-
-// register global utility filters
-Object.keys(filters).forEach(key => {
-  Vue.filter(key, filters[key])
-})
-
-Vue.config.productionTip = false
+ElementUI.Input.props.clearable = { type: Boolean, default: true };
+ElementUI.Select.props.clearable = { type: Boolean, default: true };
+ElementUI.Pagination.props.background = { type: Boolean, default: true };
+ElementUI.Pagination.props.layout = {
+  type: String,
+  default: "total,prev,pager,next",
+};
 
 new Vue({
-  el: '#app',
   router,
   store,
-  render: h => h(App)
-})
+  render: function(h) {
+    return h(App);
+  },
+}).$mount("#app");
