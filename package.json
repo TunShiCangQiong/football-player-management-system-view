@@ -1,11 +1,11 @@
 {
   "name": "vue-clean-admin",
   "version": "0.1.0",
-  "description":"一个简单干净的后台管理框架",
-  "author":"caihai123",
+  "description": "一个简单干净的后台管理框架",
+  "author": "caihai123",
   "private": true,
   "license": "MIT",
-  "homepage":"https://gitee.com/caihai123/vue-clean-admin",
+  "homepage": "https://gitee.com/caihai123/vue-clean-admin",
   "scripts": {
     "dev": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -36,6 +36,7 @@
     "eslint": "^6.7.2",
     "eslint-plugin-prettier": "^3.1.3",
     "eslint-plugin-vue": "^8.2.0",
+    "husky": "^8.0.3",
     "prettier": "^1.19.1",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
